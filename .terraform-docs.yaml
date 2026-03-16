@@ -1,0 +1,167 @@
+formatter: "markdown table"
+
+header-from: main.tf
+footer-from: ""
+
+recursive:
+  enabled: false
+
+sections:
+  hide: []
+  show: []
+
+content: |-
+  {{ .Header }}
+
+  ## Table of Contents
+
+  - [Prerequisites](#prerequisites)
+  - [Security](#security)
+  - [Features](#features)
+  - [Usage](#usage)
+  - [Requirements](#requirements)
+
+  ## Prerequisites
+
+  This module is designed for macOS. The following must already be installed on your machine:
+  - Python 3 and pip
+  - [Kiro](https://kiro.dev) and Kiro CLI
+  - [Homebrew](https://brew.sh)
+
+  To install the remaining development tools, run:
+  ```bash
+  make install-dev-tools
+  ```
+
+  This will install/upgrade: tfenv, Terraform (via tfenv), tflint, terraform-docs, checkov, and pre-commit.
+
+  ## Security
+
+  ### Security Controls
+
+  This module implements security controls to comply with:
+  - AWS Foundational Security Best Practices (FSBP)
+  - CIS AWS Foundations Benchmark
+  - NIST 800-53 Rev 5
+  - NIST 800-171 Rev 2
+  - PCI DSS v4.0
+
+  ### Implemented Controls
+
+  - **Private Subnets**: EFA interfaces are deployed in private subnets by default
+  - **IMDSv2**: Instance Metadata Service v2 is enforced for enhanced security
+  - **Security Groups**: Configurable security groups for network access control
+  - **EBS Optimization**: Enabled for high-performance storage access
+  - **Huge Pages**: Configurable huge pages for EFA workloads (5128 x 2MiB by default)
+
+  ### Security Control Overrides
+
+  Security controls can be selectively overridden with documented justification:
+  - `disable_private_subnets`: Allow EFA interfaces in public subnets (not recommended)
+
+  ## Features
+
+  - **EFA Network Interfaces**: Creates multiple EFA network interfaces for high-performance inter-node communication
+  - **Launch Template**: Optional launch template for EKS node groups with EFA support
+  - **Instance Type Validation**: Validates that specified instance types support EFA
+  - **Huge Pages Configuration**: Automatic huge pages setup for optimal EFA performance
+  - **Security Integration**: Integrates with terraform-aws-metadata for consistent security controls
+  - **Flexible Deployment**: Supports both standalone EFA interfaces and EKS node group integration
+
+  ## Usage
+
+  ### Basic EFA Network Interfaces
+
+  ```hcl
+  module "efa" {
+    source = "github.com/islamelkadi/terraform-aws-efa?ref=v1.0.0"
+
+    namespace   = "example"
+    environment = "prod"
+    name        = "ml-training"
+    region      = "us-west-2"
+
+    subnet_ids         = ["subnet-12345678", "subnet-87654321"]
+    security_group_ids = ["sg-12345678"]
+    efa_count          = 4
+    interface_type     = "efa"
+
+    tags = {
+      Project = "DistributedML"
+      Team    = "MLOps"
+    }
+  }
+  ```
+
+  ### EKS Node Group with EFA Launch Template
+
+  ```hcl
+  module "efa_launch_template" {
+    source = "github.com/islamelkadi/terraform-aws-efa?ref=v1.0.0"
+
+    namespace   = "example"
+    environment = "prod"
+    name        = "gpu-cluster"
+    region      = "us-west-2"
+
+    subnet_ids         = ["subnet-12345678", "subnet-87654321"]
+    security_group_ids = ["sg-12345678"]
+    
+    # Launch template configuration
+    create_launch_template = true
+    instance_type          = "p5.48xlarge"
+    efa_count             = 32
+    interface_type        = "efa"
+    
+    # Huge pages for EFA workloads
+    enable_huge_pages = true
+    huge_pages_count  = 5128
+
+    tags = {
+      Project = "DistributedML"
+      Team    = "MLOps"
+    }
+  }
+  ```
+
+  {{ .Requirements }}
+
+  {{ .Providers }}
+
+  {{ .Modules }}
+
+  {{ .Resources }}
+
+  {{ .Inputs }}
+
+  {{ .Outputs }}
+
+output:
+  file: "README.md"
+  mode: inject
+  template: |-
+    <!-- BEGIN_TF_DOCS -->
+    {{ .Content }}
+    <!-- END_TF_DOCS -->
+
+output-values:
+  enabled: false
+
+sort:
+  enabled: true
+  by: name
+
+settings:
+  anchor: true
+  color: true
+  default: true
+  description: false
+  escape: true
+  hide-empty: false
+  html: true
+  indent: 2
+  lockfile: true
+  read-comments: true
+  required: true
+  sensitive: true
+  type: true

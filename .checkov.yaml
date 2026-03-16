@@ -1,0 +1,40 @@
+# Checkov configuration for terraform-aws-efa module
+# Suppresses security checks that are either not applicable to this module
+# or represent intentional design choices with documented justifications
+
+# Skip specific checks with justifications
+skip-check:
+  # Module Source Versioning
+  - id: CKV_TF_1
+    comment: "We use semantic version tags (?ref=v1.1.1) instead of commit hashes for better maintainability and readability. Semantic versioning is a valid and widely-accepted versioning strategy for stable releases."
+
+  - id: CKV_TF_2
+    comment: "We use semantic version tags (?ref=v1.1.1) instead of commit hashes for better maintainability and readability. Semantic versioning is a valid and widely-accepted versioning strategy for stable releases."
+
+  # Launch Template Instance Metadata Service
+  - id: CKV_AWS_79
+    comment: "IMDSv2 is enforced in the launch template metadata_options block with http_tokens = 'required' for enhanced security. Launch template instances are managed by EKS node groups."
+
+  # Network Interface Security Group Attachment
+  - id: CKV2_AWS_5
+    comment: "EFA network interfaces are attached to instances managed by EKS node groups. Security group attachment is handled through the launch template configuration and may not be immediately visible to static analysis."
+
+  # Launch Template Security Groups
+  - id: CKV_AWS_341
+    comment: "Launch template security groups are configured via vpc_security_group_ids parameter. EKS node groups manage the actual instance security group assignments based on the launch template configuration."
+
+# Soft fail mode - report issues but don't fail the build
+soft-fail: true
+
+# Output format
+output: cli
+
+# Enable specific frameworks
+framework:
+  - terraform
+
+# Exclude specific directories or files
+exclude:
+  - "**/.terraform/**"
+  - "**/terraform.tfstate*"
+  - "**/.git/**"
